@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>لعبة النينجا - النسخة المنظمة</title>
+    
+    <style>
+        :root {
+            --primary-blue: #00d2ff;
+            --bg-dark: #050a10;
+            --neon-glow: 0 0 15px #4facfe;
+        }
+
+        body { margin: 0; overflow: hidden; background: var(--bg-dark); font-family: 'Segoe UI', sans-serif; }
+        
+        canvas { 
+            display: block; 
+            background: radial-gradient(circle, #0a1f35 0%, #000 100%);
+        }
+
+        /* خانة إحصائيات اللاعب */
+        .stats-bar {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            border-radius: 50px;
+            border: 1px solid rgba(79, 172, 254, 0.3);
+            color: white;
+            display: flex;
+            gap: 15px;
+            pointer-events: none;
+        }
+
+        .back-home {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--primary-blue);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            box-shadow: var(--neon-glow);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="stats-bar">
+        <span>🏆 <span id="score">0</span></span>
+        <span>⚡ مستوى <span id="level">1</span></span>
+        <span>❤️ <span id="livesDisplay"></span></span>
+    </div>
+
+    <a href="../index.html" class="back-home">خروج</a>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <script>
+        // --- قسم الإعدادات (Settings) ---
+        const config = {
+            canvas: document.getElementById('gameCanvas'),
+            ctx: document.getElementById('gameCanvas').getContext('2d'),
+            ballR: 15,
+            playerW: 110,
+            playerH: 15,
+            gravity: 3
+        };
+
+        // --- قسم حالة اللعبة (State) ---
+        let gameState = {
+            score: 0,
+            level: 1,
+            lives: 3,
+            speed: config.gravity,
+            ball: { x: 0, y: -20 },
+            playerX: 0
+        };
+
+        // --- قسم المحرك (Engine) ---
+        function init() {
+            config.canvas.width = window.innerWidth;
+            config.canvas.height = window.innerHeight;
+            gameState.playerX = (config.canvas.width - config.playerW) / 2;
+            resetBall();
+            updateUI();
+            run();
+        }
+
+        function resetBall() {
+            gameState.ball.y = -20;
+            gameState.ball.x = Math.random() * (config.canvas.width - 40) + 20;
+        }
+
+        function updateUI() {
+            document.getElementById('score').innerText = gameState.score;
+            document.getElementById('level').innerText = gameState.level;
+            document.getElementById('livesDisplay').innerText = "❤️".repeat(gameState.lives);
+        }
+
+        function draw() {
+            const { ctx, canvas } = config;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // رسم اللاعب (الخانة المخصصة)
+            ctx.shadowBlur = 15; ctx.shadowColor = "#00d2ff";
+            ctx.fillStyle = "#00d2ff";
+            ctx.fillRect(gameState.playerX, canvas.height - 80, config.playerW, config.playerH);
+            ctx.shadowBlur = 0;
+
+            // رسم الكرة (الخانة المخصصة)
+            ctx.beginPath();
+            ctx.arc(gameState.ball.x, gameState.ball.y, config.ballR, 0, Math.PI * 2);
+            ctx.fillStyle = "gold";
+            ctx.fill();
+            ctx.closePath();
+
+            // حركة الكرة والاصطدام
+            gameState.ball.y += gameState.speed;
+
+            if (gameState.ball.y > canvas.height) {
+                gameState.lives--;
+                updateUI();
+                resetBall();
+                if (gameState.lives <= 0) {
+                    alert("نهاية اللعبة! مجموعك: " + gameState.score);
+                    location.reload();
+                }
+            }
+
+            if (gameState.ball.y + config.ballR > canvas.height - 80 && 
+                gameState.ball.x > gameState.playerX && 
+                gameState.ball.x < gameState.playerX + config.playerW) {
+                gameState.score += 10;
+                if (gameState.score % 50 === 0) {
+                    gameState.level++;
+                    gameState.speed += 1.2;
+                }
+                updateUI();
+                resetBall();
+            }
+        }
+
+        function run() {
+            draw();
+            requestAnimationFrame(run);
+        }
+
+        // --- قسم التحكم (Controls) ---
+        config.canvas.addEventListener('touchmove', (e) => {
+            gameState.playerX = e.touches[0].clientX - config.playerW / 2;
+        });
+
+        init();
+    </script>
+</body>
+</html>
