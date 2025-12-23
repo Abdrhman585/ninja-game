@@ -1,113 +1,125 @@
 <!DOCTYPE html>
-<html dir='rtl' lang='ar'>
+<html lang="ar" dir="rtl">
 <head>
-    <meta charset='UTF-8'>
-    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'>
-    <title>تحدي النينجا المطور</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة ألعاب عبد الرحمن</title>
     <style>
-        body { margin: 0; background: #0f0c29; color: #fff; text-align: center; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
-        canvas { background: linear-gradient(to bottom, #24243e, #302b63, #0f0c29); display: block; margin: 10px auto; border: 4px solid #00d2ff; border-radius: 20px; box-shadow: 0 0 20px #00d2ff; touch-action: none; }
-        .stats { display: flex; justify-content: space-around; font-size: 18px; padding: 10px; background: rgba(0,0,0,0.5); }
-        .level-up { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 40px; color: gold; display: none; text-shadow: 2px 2px #000; }
+        /* إعدادات الخلفية والإطار الملون */
+        body {
+            background: linear-gradient(135deg, #020406 0%, #05192d 100%); /* أزرق وأسود خفيف */
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+            min-height: 100vh;
+            /* إطار احترافي بألوان متغيرة */
+            border: 8px solid;
+            border-image: linear-gradient(45deg, #00f2fe, #4facfe, #7000ff, #00c6ff) 1;
+            box-sizing: border-box;
+        }
+
+        /* عنوان المنصة */
+        h1 {
+            margin-top: 20px;
+            text-shadow: 2px 2px 10px #4facfe;
+        }
+
+        /* خانة الإعلان العلوية */
+        .top-ad {
+            width: 80%;
+            height: 90px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px dashed #4facfe;
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #4facfe;
+            font-size: 14px;
+        }
+
+        .main-layout {
+            display: flex;
+            width: 95%;
+            justify-content: space-between;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        /* خانات الإعلانات الجانبية */
+        .side-ad {
+            width: 120px;
+            height: 400px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px dashed #4facfe;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 12px;
+            color: #4facfe;
+        }
+
+        /* حاوية الألعاب (الخانات) */
+        .games-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            flex-grow: 1;
+            padding: 10px;
+        }
+
+        .game-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid #4facfe;
+            text-align: center;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .game-card:hover {
+            transform: translateY(-5px);
+            background: rgba(79, 172, 254, 0.3);
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+        }
+
+        .game-card h3 { margin: 10px 0 5px 0; }
+        .game-card p { font-size: 12px; color: #ccc; }
     </style>
 </head>
 <body>
-    <div class="stats">
-        <div>النقاط: <span id="score">0</span></div>
-        <div>المستوى: <span id="level">1</span></div>
-        <div id="livesDisplay">💛💚💙</div>
-    </div>
-    <div id="msg" class="level-up">مستوى جديد! ⚡</div>
-    <canvas id="gameCanvas"></canvas>
 
-    <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth - 20;
-        canvas.height = 450;
+    <h1>منصة ألعاب عبد الرحمن</h1>
 
-        let score = 0; let lives = 6; let level = 1; let gameSpeed = 4;
-        let player = { x: canvas.width/2 - 35, y: canvas.height - 60, w: 70, h: 20, color: '#00d2ff' };
-        let ball = { x: Math.random()*canvas.width, y: -20, r: 15, type: 'gold' };
+    <div class="top-ad">مساحة إعلانية (Banner)</div>
 
-        const types = {
-            gold: { c: '#f1c40f', p: 1 },
-            green: { c: '#2ecc71', p: 5 },
-            blue: { c: '#3498db', p: 0 },
-            bomb: { c: '#000', p: 0 }
-        };
+    <div class="main-layout">
+        <div class="side-ad">إعلان<br>جانبي</div>
 
-        function showMsg() {
-            let m = document.getElementById('msg');
-            m.style.display = 'block';
-            setTimeout(() => m.style.display = 'none', 1000);
-        }
-
-        function resetBall() {
-            ball.y = -20; ball.x = 20 + Math.random()*(canvas.width-40);
-            let r = Math.random();
-            if(r < 0.6) ball.type = 'gold';
-            else if(r < 0.8) ball.type = 'bomb';
-            else if(r < 0.95) ball.type = 'green';
-            else ball.type = 'blue';
-        }
-
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        <div class="games-container">
+            <div class="game-card" onclick="location.href='ball-game/index.html'">
+                <div style="font-size: 40px;">🏀</div>
+                <h3>لعبة الكرات</h3>
+                <p>اللعبة الكلاسيكية</p>
+            </div>
             
-            // رسم اللاعب بتأثير نيون
-            ctx.shadowBlur = 15; ctx.shadowColor = player.color;
-            ctx.fillStyle = player.color;
-            ctx.fillRect(player.x, player.y, player.w, player.h);
-            ctx.shadowBlur = 0;
+            <div class="game-card" onclick="location.href='snake-game/index.html'">
+                <div style="font-size: 40px;">🐍</div>
+                <h3>لعبة الدودة</h3>
+                <p>قريباً جداً</p>
+            </div>
+        </div>
 
-            // رسم الكرة
-            ctx.beginPath();
-            ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI*2);
-            ctx.fillStyle = types[ball.type].c;
-            ctx.fill();
-            if(ball.type === 'bomb') { ctx.strokeStyle = 'red'; ctx.lineWidth = 3; ctx.stroke(); }
-            ctx.closePath();
+        <div class="side-ad">إعلان<br>جانبي</div>
+    </div>
 
-            ball.y += gameSpeed;
-
-            // سقوط الكرة
-            if (ball.y > canvas.height) {
-                if(ball.type !== 'bomb') {
-                    lives--; updateUI();
-                    if(lives <= 0) { alert('Game Over! Points: ' + score); location.reload(); }
-                }
-                resetBall();
-            }
-
-            // الاصطدام
-            if (ball.y + ball.r > player.y && ball.x > player.x && ball.x < player.x + player.w) {
-                if(ball.type === 'bomb') {
-                    lives -= 2; // القنبلة تنقص قلب كامل
-                } else {
-                    score += types[ball.type].p;
-                    if(ball.type === 'blue' && lives < 6) lives++;
-                    if(score >= level * 20) { 
-                        level++; gameSpeed += 1.5; showMsg(); 
-                        player.color = level % 2 === 0 ? '#ff00ff' : '#00d2ff';
-                    }
-                }
-                updateUI(); resetBall();
-            }
-            requestAnimationFrame(draw);
-        }
-
-        function updateUI() {
-            document.getElementById('score').innerText = score;
-            document.getElementById('level').innerText = level;
-            let h = ""; let full = Math.floor(lives/2);
-            for(let i=0; i<full; i++) h += "❤️";
-            if(lives%2) h += "💔";
-            document.getElementById('livesDisplay').innerText = h;
-        }
-
-        canvas.addEventListener('touchmove', (e) => {
-            player.x = e.touches[0].clientX - canvas.offsetLeft - player.w/2;
+</body>
+</html>
         });
 
         draw();
