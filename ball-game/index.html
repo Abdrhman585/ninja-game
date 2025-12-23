@@ -2,112 +2,76 @@
 <html lang="ar">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لعبة النينجا - النسخة السريعة</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>النسخة السريعة الموزونة</title>
     <style>
-        /* خانة التنسيق لضمان السرعة وعدم التمدد */
+        /* خلفية بسيطة وسريعة */
         body { 
-            margin: 0; 
-            background: #0a192f; /* لون خلفية هادئ */
-            display: flex; 
-            flex-direction: column;
-            align-items: center; 
-            justify-content: center; 
-            height: 100vh; 
-            font-family: sans-serif;
+            margin: 0; background: #050a10; 
+            display: flex; flex-direction: column; align-items: center; 
+            height: 100vh; overflow: hidden; touch-action: none;
         }
-
-        /* إطار اللعبة المحدد */
-        #game-container {
-            position: relative;
-            width: 350px; /* حجم مثالي للهاتف */
-            height: 500px;
-            border: 4px solid #4facfe;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            background: #000;
+        /* تحديد الحجم ليكون وسطاً (ليس كل الشاشة) */
+        canvas { 
+            background: #000; border: 2px solid #4facfe; 
+            margin-top: 50px; /* لترك مساحة في الأعلى */
+            box-shadow: 0 0 15px #4facfe;
         }
-
-        canvas { display: block; }
-
-        .top-bar {
-            width: 350px;
-            display: flex;
-            justify-content: space-between;
-            padding: 10px;
-            color: white;
-            font-weight: bold;
-        }
-
-        .exit-btn {
-            background: #ff4b2b;
-            color: white;
-            text-decoration: none;
-            padding: 5px 15px;
-            border-radius: 5px;
-            font-size: 14px;
-        }
+        .header { color: white; padding: 10px; font-family: sans-serif; display: flex; gap: 20px; }
+        .btn-back { color: #4facfe; text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
-
-    <div class="top-bar">
-        <span>🏆 <span id="score">0</span></span>
-        <a href="../index.html" class="exit-btn">خروج</a>
+    <div class="header">
+        <a href="../index.html" class="btn-back">⬅ خروج</a>
+        <span>النقاط: <span id="score">0</span></span>
     </div>
 
-    <div id="game-container">
-        <canvas id="gameCanvas"></canvas>
-    </div>
+    <canvas id="game" width="320" height="450"></canvas>
 
     <script>
-        const canvas = document.getElementById('gameCanvas');
+        const canvas = document.getElementById('game');
         const ctx = canvas.getContext('2d');
-        
-        // تثبيت الأبعاد لزيادة سرعة التحميل
-        canvas.width = 350;
-        canvas.height = 500;
-
         let score = 0;
-        let ball = { x: 175, y: -20, r: 12 };
-        let player = { x: 140, w: 70, h: 10 };
+        let ball = { x: 160, y: 0, r: 10 };
+        let player = { x: 120, w: 80, h: 12 };
 
         function draw() {
             ctx.fillStyle = "black";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // رسم الكرة (ذهبية متوهجة قليلاً)
+            // الكرة
             ctx.fillStyle = "gold";
             ctx.beginPath();
             ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI*2);
             ctx.fill();
 
-            // رسم النينجا (المضرب)
+            // المضرب
             ctx.fillStyle = "#4facfe";
-            ctx.fillRect(player.x, canvas.height - 40, player.w, player.h);
+            ctx.fillRect(player.x, canvas.height - 30, player.w, player.h);
 
-            ball.y += 5; // سرعة معتدلة
+            ball.y += 5; // سرعة النسخة الأولى
 
-            // إعادة الكرة عند السقوط
-            if(ball.y > canvas.height) {
-                ball.y = -20;
-                ball.x = Math.random() * 300 + 25;
-                score = 0;
-                document.getElementById('score').innerText = score;
-            }
-
-            // الاصطدام
-            if(ball.y + ball.r > canvas.height - 40 && ball.x > player.x && ball.x < player.x + player.w) {
+            if(ball.y > canvas.height) { ball.y = 0; ball.x = Math.random()*300; score = 0; }
+            
+            if(ball.y > canvas.height - 42 && ball.x > player.x && ball.x < player.x + player.w) {
                 score += 10;
-                document.getElementById('score').innerText = score;
-                ball.y = -20;
-                ball.x = Math.random() * 300 + 25;
+                ball.y = 0; ball.x = Math.random()*300;
             }
 
+            document.getElementById('score').innerText = score;
             requestAnimationFrame(draw);
         }
 
+        canvas.addEventListener('touchmove', (e) => {
+            let rect = canvas.getBoundingClientRect();
+            player.x = (e.touches[0].clientX - rect.left) - player.w / 2;
+        });
+
+        draw();
+    </script>
+</body>
+</html>
         // تحكم لمس دقيق وسريع
         canvas.addEventListener('touchmove', (e) => {
             let rect = canvas.getBoundingClientRect();
