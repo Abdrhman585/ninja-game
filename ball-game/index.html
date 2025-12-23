@@ -2,160 +2,124 @@
 <html lang="ar">
 <head>
     <meta charset="UTF-8">
-    <title>لعبة النينجا - النسخة المنظمة</title>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعبة النينجا - النسخة السريعة</title>
     <style>
-        :root {
-            --primary-blue: #00d2ff;
-            --bg-dark: #050a10;
-            --neon-glow: 0 0 15px #4facfe;
+        /* خانة التنسيق لضمان السرعة وعدم التمدد */
+        body { 
+            margin: 0; 
+            background: #0a192f; /* لون خلفية هادئ */
+            display: flex; 
+            flex-direction: column;
+            align-items: center; 
+            justify-content: center; 
+            height: 100vh; 
+            font-family: sans-serif;
         }
 
-        body { margin: 0; overflow: hidden; background: var(--bg-dark); font-family: 'Segoe UI', sans-serif; }
-        
-        canvas { 
-            display: block; 
-            background: radial-gradient(circle, #0a1f35 0%, #000 100%);
+        /* إطار اللعبة المحدد */
+        #game-container {
+            position: relative;
+            width: 350px; /* حجم مثالي للهاتف */
+            height: 500px;
+            border: 4px solid #4facfe;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            background: #000;
         }
 
-        /* خانة إحصائيات اللاعب */
-        .stats-bar {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            padding: 10px 20px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(5px);
-            border-radius: 50px;
-            border: 1px solid rgba(79, 172, 254, 0.3);
-            color: white;
+        canvas { display: block; }
+
+        .top-bar {
+            width: 350px;
             display: flex;
-            gap: 15px;
-            pointer-events: none;
+            justify-content: space-between;
+            padding: 10px;
+            color: white;
+            font-weight: bold;
         }
 
-        .back-home {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: var(--primary-blue);
+        .exit-btn {
+            background: #ff4b2b;
             color: white;
-            padding: 10px 15px;
-            border-radius: 8px;
             text-decoration: none;
-            font-weight: bold;
-            box-shadow: var(--neon-glow);
+            padding: 5px 15px;
+            border-radius: 5px;
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
 
-    <div class="stats-bar">
+    <div class="top-bar">
         <span>🏆 <span id="score">0</span></span>
-        <span>⚡ مستوى <span id="level">1</span></span>
-        <span>❤️ <span id="livesDisplay"></span></span>
+        <a href="../index.html" class="exit-btn">خروج</a>
     </div>
 
-    <a href="../index.html" class="back-home">خروج</a>
-
-    <canvas id="gameCanvas"></canvas>
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+    </div>
 
     <script>
-        // --- قسم الإعدادات (Settings) ---
-        const config = {
-            canvas: document.getElementById('gameCanvas'),
-            ctx: document.getElementById('gameCanvas').getContext('2d'),
-            ballR: 15,
-            playerW: 110,
-            playerH: 15,
-            gravity: 3
-        };
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // تثبيت الأبعاد لزيادة سرعة التحميل
+        canvas.width = 350;
+        canvas.height = 500;
 
-        // --- قسم حالة اللعبة (State) ---
-        let gameState = {
-            score: 0,
-            level: 1,
-            lives: 3,
-            speed: config.gravity,
-            ball: { x: 0, y: -20 },
-            playerX: 0
-        };
-
-        // --- قسم المحرك (Engine) ---
-        function init() {
-            config.canvas.width = window.innerWidth;
-            config.canvas.height = window.innerHeight;
-            gameState.playerX = (config.canvas.width - config.playerW) / 2;
-            resetBall();
-            updateUI();
-            run();
-        }
-
-        function resetBall() {
-            gameState.ball.y = -20;
-            gameState.ball.x = Math.random() * (config.canvas.width - 40) + 20;
-        }
-
-        function updateUI() {
-            document.getElementById('score').innerText = gameState.score;
-            document.getElementById('level').innerText = gameState.level;
-            document.getElementById('livesDisplay').innerText = "❤️".repeat(gameState.lives);
-        }
+        let score = 0;
+        let ball = { x: 175, y: -20, r: 12 };
+        let player = { x: 140, w: 70, h: 10 };
 
         function draw() {
-            const { ctx, canvas } = config;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "black";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // رسم اللاعب (الخانة المخصصة)
-            ctx.shadowBlur = 15; ctx.shadowColor = "#00d2ff";
-            ctx.fillStyle = "#00d2ff";
-            ctx.fillRect(gameState.playerX, canvas.height - 80, config.playerW, config.playerH);
-            ctx.shadowBlur = 0;
-
-            // رسم الكرة (الخانة المخصصة)
-            ctx.beginPath();
-            ctx.arc(gameState.ball.x, gameState.ball.y, config.ballR, 0, Math.PI * 2);
+            // رسم الكرة (ذهبية متوهجة قليلاً)
             ctx.fillStyle = "gold";
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI*2);
             ctx.fill();
-            ctx.closePath();
 
-            // حركة الكرة والاصطدام
-            gameState.ball.y += gameState.speed;
+            // رسم النينجا (المضرب)
+            ctx.fillStyle = "#4facfe";
+            ctx.fillRect(player.x, canvas.height - 40, player.w, player.h);
 
-            if (gameState.ball.y > canvas.height) {
-                gameState.lives--;
-                updateUI();
-                resetBall();
-                if (gameState.lives <= 0) {
-                    alert("نهاية اللعبة! مجموعك: " + gameState.score);
-                    location.reload();
-                }
+            ball.y += 5; // سرعة معتدلة
+
+            // إعادة الكرة عند السقوط
+            if(ball.y > canvas.height) {
+                ball.y = -20;
+                ball.x = Math.random() * 300 + 25;
+                score = 0;
+                document.getElementById('score').innerText = score;
             }
 
-            if (gameState.ball.y + config.ballR > canvas.height - 80 && 
-                gameState.ball.x > gameState.playerX && 
-                gameState.ball.x < gameState.playerX + config.playerW) {
-                gameState.score += 10;
-                if (gameState.score % 50 === 0) {
-                    gameState.level++;
-                    gameState.speed += 1.2;
-                }
-                updateUI();
-                resetBall();
+            // الاصطدام
+            if(ball.y + ball.r > canvas.height - 40 && ball.x > player.x && ball.x < player.x + player.w) {
+                score += 10;
+                document.getElementById('score').innerText = score;
+                ball.y = -20;
+                ball.x = Math.random() * 300 + 25;
             }
+
+            requestAnimationFrame(draw);
         }
 
-        function run() {
-            draw();
-            requestAnimationFrame(run);
-        }
-
-        // --- قسم التحكم (Controls) ---
-        config.canvas.addEventListener('touchmove', (e) => {
-            gameState.playerX = e.touches[0].clientX - config.playerW / 2;
+        // تحكم لمس دقيق وسريع
+        canvas.addEventListener('touchmove', (e) => {
+            let rect = canvas.getBoundingClientRect();
+            let touchX = e.touches[0].clientX - rect.left;
+            player.x = touchX - player.w / 2;
+            
+            // منع الخروج عن الإطار
+            if(player.x < 0) player.x = 0;
+            if(player.x > canvas.width - player.w) player.x = canvas.width - player.w;
         });
 
-        init();
+        draw();
     </script>
 </body>
 </html>
