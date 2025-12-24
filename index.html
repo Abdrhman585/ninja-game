@@ -3,111 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة ألعاب عبد الرحمن</title>
+    <title>منصة ألعاب النينجا</title>
     <style>
-        /* إعدادات الخلفية والإطار الملون */
+        :root {
+            --primary: #00d2ff;
+            --secondary: #ff0055;
+            --dark-bg: #050a10;
+        }
+
         body {
-            background: linear-gradient(135deg, #020406 0%, #05192d 100%); /* أزرق وأسود خفيف */
             margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--dark-bg);
             color: white;
-            min-height: 100vh;
-            /* إطار احترافي بألوان متغيرة */
-            border: 8px solid;
-            border-image: linear-gradient(45deg, #00f2fe, #4facfe, #7000ff, #00c6ff) 1;
-            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
         }
 
         /* عنوان المنصة */
-        h1 {
-            margin-top: 20px;
-            text-shadow: 2px 2px 10px #4facfe;
-        }
-
-        /* خانة الإعلان العلوية */
-        .top-ad {
-            width: 80%;
-            height: 90px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px dashed #4facfe;
-            margin: 15px 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #4facfe;
-            font-size: 14px;
-        }
-
-        .main-layout {
-            display: flex;
-            width: 95%;
-            justify-content: space-between;
-            gap: 15px;
-            margin-top: 10px;
-        }
-
-        /* خانات الإعلانات الجانبية */
-        .side-ad {
-            width: 120px;
-            height: 400px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px dashed #4facfe;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        header {
             text-align: center;
-            font-size: 12px;
-            color: #4facfe;
+            padding: 40px 20px;
+            background: linear-gradient(to bottom, #0a1f35, var(--dark-bg));
         }
 
-        /* حاوية الألعاب (الخانات) */
-        .games-container {
+        h1 {
+            font-size: 2.5rem;
+            text-shadow: 0 0 20px var(--primary);
+            margin: 0;
+        }
+
+        p { color: #888; margin-top: 10px; }
+
+        /* شبكة الألعاب */
+        .games-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 20px;
-            flex-grow: 1;
-            padding: 10px;
-        }
-
-        .game-card {
-            background: rgba(255, 255, 255, 0.1);
             padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* تصميم بطاقة اللعبة */
+        .game-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 15px;
-            border: 2px solid #4facfe;
+            padding: 20px;
             text-align: center;
-            transition: 0.3s;
-            cursor: pointer;
+            text-decoration: none;
+            color: white;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
         }
 
-        .game-card:hover {
-            transform: translateY(-5px);
-            background: rgba(79, 172, 254, 0.3);
-            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+        .game-card:active {
+            transform: scale(0.95);
+            background: rgba(0, 210, 255, 0.2);
+            border-color: var(--primary);
         }
 
-        .game-card h3 { margin: 10px 0 5px 0; }
-        .game-card p { font-size: 12px; color: #ccc; }
+        .icon {
+            font-size: 40px;
+            margin-bottom: 5px;
+        }
+
+        .game-title { font-weight: bold; font-size: 1.1rem; }
+
+        /* قسم الإعلانات */
+        .ad-space {
+            margin: 40px 20px;
+            padding: 20px;
+            border: 2px dashed #333;
+            border-radius: 10px;
+            text-align: center;
+            color: #555;
+        }
     </style>
 </head>
 <body>
 
-    <h1>منصة ألعاب عبد الرحمن</h1>
+    <header>
+        <h1>نـيـنـجـا جـيـمـز</h1>
+        <p>مرحباً بك في عالم المتعة والإثارة</p>
+    </header>
 
-    <div class="top-ad">مساحة إعلانية (Banner)</div>
+    <div class="games-grid">
+        <a href="ball-game/index.html" class="game-card">
+            <div class="icon">🎾</div>
+            <div class="game-title">لعبة الكرات</div>
+        </a>
 
-    <div class="main-layout">
-        <div class="side-ad">إعلان<br>جانبي</div>
+        <a href="space-game/index.html" class="game-card" style="border-bottom: 3px solid var(--secondary);">
+            <div class="icon">🚀</div>
+            <div class="game-title">حرب الفضاء</div>
+        </a>
 
-        <div class="games-container">
-            <div class="game-card" onclick="location.href='ball-game/index.html'">
-                <div style="font-size: 40px;">🏀</div>
-                <h3>لعبة الكرات</h3>
-                <p>اللعبة الكلاسيكية</p>
-            </div>
-            
+        <a href="gravity-game/index.html" class="game-card">
+            <div class="icon">⚡</div>
+            <div class="game-title">تحدي الجاذبية</div>
+        </a>
+
+        <div class="game-card" style="opacity: 0.5;">
+            <div class="icon">🔒</div>
+            <div class="game-title">قريباً</div>
+        </div>
+    </div>
+
+    <div class="ad-space">
+        مساحة إعلانية مخصصة (قريباً)
+    </div>
+
+</body>
+</html>
             <div class="game-card" onclick="location.href='snake-game/index.html'">
                 <div style="font-size: 40px;">🐍</div>
                 <h3>لعبة الدودة</h3>
