@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ar"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><style>
+body { margin: 0; background: #000; overflow: hidden; touch-action: none; font-family: sans-serif; }
+#ui { position: absolute; top: 10px; left: 10px; color: #0f0; font-size: 20px; }
+.exit { position: absolute; top: 10px; right: 10px; color: white; background: #444; padding: 5px 10px; text-decoration: none; border-radius: 5px; }
+</style></head><body>
+<div id="ui">النقاط: <span id="s">0</span></div><a href="../index.html" class="exit">خروج</a><canvas id="g"></canvas>
+<script>
+const cvs = document.getElementById('g'); const ctx = cvs.getContext('2d');
+cvs.width = window.innerWidth; cvs.height = window.innerHeight;
+let s = 0; let ship = { x: cvs.width/2, y: cvs.height-80, w: 40, h: 40 };
+let bullets = []; let enemies = [];
+setInterval(() => enemies.push({x:Math.random()*(cvs.width-30), y:-30, spd:3+Math.random()*2}), 1000);
+window.ontouchstart = () => bullets.push({x:ship.x+18, y:ship.y});
+function loop() {
+    ctx.fillStyle="black"; ctx.fillRect(0,0,cvs.width,cvs.height);
+    ctx.fillStyle="#0af"; ctx.fillRect(ship.x, ship.y, ship.w, ship.h);
+    bullets.forEach((b,i) => { b.y-=8; ctx.fillStyle="red"; ctx.fillRect(b.x,b.y,4,10); if(b.y<0) bullets.splice(i,1); });
+    enemies.forEach((en,i) => {
+        en.y+=en.spd; ctx.fillStyle="#f0f"; ctx.fillRect(en.x,en.y,30,30);
+        if(en.y>cvs.height) { alert("خسرت! نقاطك: "+s); location.reload(); }
+        bullets.forEach((b,bi) => {
+            if(b.x<en.x+30 && b.x+4>en.x && b.y<en.y+30) { enemies.splice(i,1); bullets.splice(bi,1); s+=10; document.getElementById('s').innerText=s; }
+        });
+    });
+    window.ontouchmove = (e) => ship.x = e.touches[0].clientX-20;
+    requestAnimationFrame(loop);
+} loop();
+</script></body></html>
