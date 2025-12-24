@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ar"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><style>
+body { margin: 0; background: #111; overflow: hidden; touch-action: none; font-family: sans-serif; color: #0f0; }
+#s { position: absolute; top: 20px; width: 100%; text-align: center; font-size: 30px; }
+.exit { position: absolute; top: 10px; left: 10px; color: white; text-decoration: none; z-index: 10; }</style></head><body>
+<div id="s">0</div><a href="../index.html" class="exit">⬅ خروج</a><canvas id="g"></canvas>
+<script>
+const c = document.getElementById('g'); const ctx = c.getContext('2d');
+c.width = window.innerWidth; c.height = window.innerHeight;
+let sc = 0; let ply = { x:50, y:c.height-60, up:false }; let obs = [];
+window.ontouchstart = () => ply.up = !ply.up;
+setInterval(() => obs.push({x:c.width, y:Math.random()>0.5?0:c.height-50}), 1500);
+function run() {
+    ctx.fillStyle="#000"; ctx.fillRect(0,0,c.width,c.height);
+    let targetY = ply.up ? 0 : c.height-50; ply.y += (targetY - ply.y) * 0.2;
+    ctx.fillStyle="#0ef"; ctx.fillRect(ply.x, ply.y, 40, 40);
+    obs.forEach((o,i) => {
+        o.x -= 6; ctx.fillStyle="#f05"; ctx.fillRect(o.x, o.y, 30, 50);
+        if(ply.x<o.x+30 && ply.x+40>o.x && ply.y<o.y+50 && ply.y+40>o.y) { alert("خسرت!"); location.reload(); }
+        if(o.x < -30) { obs.splice(i,1); sc++; document.getElementById('s').innerText=sc; }
+    });
+    requestAnimationFrame(run);
+} run();
+</script></body></html>
