@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>نينجا الكرات - مستوى متقدم</title>
+    <style>
+        body { margin: 0; background: #000; overflow: hidden; touch-action: none; font-family: sans-serif; }
+        #stats { 
+            position: absolute; top: 10px; width: 100%; display: flex; 
+            justify-content: space-around; color: white; font-size: 18px; pointer-events: none;
+        }
+        .heart { color: #ff0055; }
+        .level { color: #00d2ff; font-weight: bold; }
+        .exit { position: absolute; bottom: 20px; right: 20px; color: white; text-decoration: none; background: rgba(255,255,255,0.2); padding: 8px 15px; border-radius: 5px; z-index: 10; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+    <div id="stats">
+        <div>🏆 نقاط: <span id="score">0</span></div>
+        <div class="level">⭐ مستوى: <span id="lvl">1</span></div>
+        <div class="heart">❤️ قلوب: <span id="lives">3</span></div>
+    </div>
+    <a href="../index.html" class="exit">خروج</a>
+    <canvas id="c"></canvas>
+
+    <script>
+        const canvas = document.getElementById('c');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let score = 0;
+        let level = 1;
+        let lives = 3;
+        let speed = 4;
+
+        let player = { x: canvas.width/2 - 40, w: 90, h: 15 };
+        let items = []; // سيحتوي على الكرات والقنابل
+
+        // وظيفة لإنشاء عنصر جديد (كرة أو قنبلة)
+        function createItem() {
+            let isBomb = Math.random() < 0.2; // 20% احتمال ظهور قنبلة
+            items.push({
+                x: Math.random() * (canvas.width - 30) + 15,
+                y: -20,
+                r: 12,
+                type: isBomb ? 'bomb' : 'ball',
+                color: isBomb ? '#ff4b2b' : 'gold'
+            });
+        }
+
+        setInterval(createItem, 1000);
+
+        function update() {
+            items.forEach((item, i) => {
+                item.y += speed;
+
+                // 1. إذا لمس اللاعب العنصر
+                if (item.y + item.r > canvas.height - 60 && item.x > player.x && item.x < player.x + player.w) {
+                    if (item.type === 'ball') {
+                        score += 5;
+                        // رفع المستوى كل 20 نقطة
+                        if (score % 20 === 0) {
+                            level++;
+                            speed += 0.5;
+                        }
+                    } else {
+                        // إذا لمس قنبلة: ينقص 15 نقطة) نقطةى 1)
+                        level = Math.max(1, level - 15);
+                        speed = 4 + (level * 0.5);
+                        score = (level - 1) * 20;
+                    }
+                    items.splice(i, 1);
+                }
+
+                // 2. إذا
