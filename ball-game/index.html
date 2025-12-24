@@ -3,85 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>النسخة السريعة الموزونة</title>
+    <title>حرب الفضاء</title>
     <style>
-        /* خلفية بسيطة وسريعة */
-        body { 
-            margin: 0; background: #050a10; 
-            display: flex; flex-direction: column; align-items: center; 
-            height: 100vh; overflow: hidden; touch-action: none;
-        }
-        /* تحديد الحجم ليكون وسطاً (ليس كل الشاشة) */
-        canvas { 
-            background: #000; border: 2px solid #4facfe; 
-            margin-top: 50px; /* لترك مساحة في الأعلى */
-            box-shadow: 0 0 15px #4facfe;
-        }
-        .header { color: white; padding: 10px; font-family: sans-serif; display: flex; gap: 20px; }
-        .btn-back { color: #4facfe; text-decoration: none; font-weight: bold; }
+        body { margin: 0; background: #000; overflow: hidden; touch-action: none; font-family: sans-serif; }
+        canvas { display: block; }
+        #ui { position: absolute; top: 10px; left: 10px; color: #0f0; font-size: 20px; pointer-events: none; }
+        .back-btn { position: absolute; top: 10px; right: 10px; color: white; background: #333; padding: 5px 10px; text-decoration: none; border-radius: 5px; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <a href="../index.html" class="btn-back">⬅ خروج</a>
-        <span>النقاط: <span id="score">0</span></span>
-    </div>
-
-    <canvas id="game" width="320" height="450"></canvas>
+    <div id="ui">النقاط: <span id="score">0</span></div>
+    <a href="../index.html" class="back-btn">خروج</a>
+    <canvas id="gameCanvas"></canvas>
 
     <script>
-        const canvas = document.getElementById('game');
+        const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
         let score = 0;
-        let ball = { x: 160, y: 0, r: 10 };
-        let player = { x: 120, w: 80, h: 12 };
+        let player = { x: canvas.width/2, y: canvas.height - 80, w: 40, h: 40 };
+        let bullets = [];
+        let enemies = [];
+
+        // إنشاء عدو جديد كل ثانية
+        setInterval(() => {
+            enemies.push({ x: Math.random()*(canvas.width-30), y: -30, w: 30, h: 30, speed: 2 + Math.random()*3 });
+        }, 1000);
+
+        // إطلاق النار عند اللمس
+        window.addEventListener('touchstart', (e) => {
+            bullets.push({ x: player.x + player.w/2 - 2, y: player.y, w: 4, h: 10 });
+        });
+
+        function update() {
+            // تحريك اللاعب باللمس
+            window.ontouchmove = (e) => {
+                player.x = e.touches[0].clientX - player.w/2;
+            };
+
+            // تحريك الرصاص
+            bullets.forEach((b, i) => {
+                b.y -= 7;
+                if(b.y < 0) bullets.splice(i, 1);
+            });
+
+            // تحريك الأعداء
+            enemies.forEach((en, i) => {
+                en.y += en.speed;
+                if(en.y > canvas.height) { 
+                    alert("تحطمت سفينتك! النقاط: " + score);
+                    location.reload();
+                }
+
+                // تصادم الرصاص مع الأعداء
+                bullets.forEach((b, bi) => {
+                    if(b.x < en.x + en.w && b.x + b.w > en.x && b.y < en.y + en.h && b.y + b.h > en.y) {
+                        enemies.splice(i, 1);
+                        bullets.splice(bi, 1);
+                        score += 10;
+                        document.getElementById('score').innerText = score;
+                    }
+                });
+            });
+        }
 
         function draw() {
             ctx.fillStyle = "black";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // الكرة
-            ctx.fillStyle = "gold";
-            ctx.beginPath();
-            ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI*2);
-            ctx.fill();
+            // رسم اللاعب (سفينة فضائية بسيطة)
+            ctx.fillStyle = "#0af";
+            ctx.fillRect(player.x, player.y, player.w, player.h);
 
-            // المضرب
-            ctx.fillStyle = "#4facfe";
-            ctx.fillRect(player.x, canvas.height - 30, player.w, player.h);
+            // رسم الرصاص (ليزر)
+            ctx.fillStyle = "red";
+            bullets.forEach(b => ctx.fillRect(b.x, b.y, b.w, b.h));
 
-            ball.y += 5; // سرعة النسخة الأولى
+            // رسم الأعداء (صخور فضائية)
+            ctx.fillStyle = "#f0f";
+            enemies.forEach(en => ctx.fillRect(en.x, en.y, en.w, en.h));
 
-            if(ball.y > canvas.height) { ball.y = 0; ball.x = Math.random()*300; score = 0; }
-            
-            if(ball.y > canvas.height - 42 && ball.x > player.x && ball.x < player.x + player.w) {
-                score += 10;
-                ball.y = 0; ball.x = Math.random()*300;
-            }
-
-            document.getElementById('score').innerText = score;
+            update();
             requestAnimationFrame(draw);
         }
-
-        canvas.addEventListener('touchmove', (e) => {
-            let rect = canvas.getBoundingClientRect();
-            player.x = (e.touches[0].clientX - rect.left) - player.w / 2;
-        });
-
-        draw();
-    </script>
-</body>
-</html>
-        // تحكم لمس دقيق وسريع
-        canvas.addEventListener('touchmove', (e) => {
-            let rect = canvas.getBoundingClientRect();
-            let touchX = e.touches[0].clientX - rect.left;
-            player.x = touchX - player.w / 2;
-            
-            // منع الخروج عن الإطار
-            if(player.x < 0) player.x = 0;
-            if(player.x > canvas.width - player.w) player.x = canvas.width - player.w;
-        });
 
         draw();
     </script>
