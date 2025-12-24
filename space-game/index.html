@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>حرب الفضاء</title>
+    <style>
+        body { margin: 0; background: #000; overflow: hidden; touch-action: none; font-family: sans-serif; }
+        canvas { display: block; }
+        #ui { position: absolute; top: 10px; left: 10px; color: #0f0; font-size: 20px; pointer-events: none; }
+        .back-btn { position: absolute; top: 10px; right: 10px; color: white; background: #333; padding: 5px 10px; text-decoration: none; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div id="ui">النقاط: <span id="score">0</span></div>
+    <a href="../index.html" class="back-btn">خروج</a>
+    <canvas id="gameCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let score = 0;
+        let player = { x: canvas.width/2, y: canvas.height - 80, w: 40, h: 40 };
+        let bullets = [];
+        let enemies = [];
+
+        // إنشاء عدو جديد كل ثانية
+        setInterval(() => {
+            enemies.push({ x: Math.random()*(canvas.width-30), y: -30, w: 30, h: 30, speed: 2 + Math.random()*3 });
+        }, 1000);
+
+        // إطلاق النار عند اللمس
+        window.addEventListener('touchstart', (e) => {
+            bullets.push({ x: player.x + player.w/2 - 2, y: player.y, w: 4, h: 10 });
+        });
+
+        function update() {
+            // تحريك اللاعب باللمس
+            window.ontouchmove = (e) => {
+                player.x = e.touches[0].clientX - player.w/2;
+            };
+
+            // تحريك الرصاص
+            bullets.forEach((b, i) => {
+                b.y -= 7;
+                if(b.y < 0) bullets.splice(i, 1);
+            });
+
+            // تحريك الأعداء
+            enemies.forEach((en, i) => {
+                en.y += en.speed;
+                if(en.y > canvas.height) { 
+                    alert("تحطمت سفينتك! النقاط: " + score);
+                    location.reload();
+                }
+
+                // تصادم الرصاص مع الأعداء
+                bullets.forEach((b, bi) => {
+                    if(b.x < en.x + en.w && b.x + b.w > en.x && b.y < en.y + en.h && b.y + b.h > en.y) {
+                        enemies.splice(i, 1);
+                        bullets.splice(bi, 1);
+                        score += 10;
+                        document.getElementById('score').innerText = score;
+                    }
+                });
+            });
+        }
+
+        function draw() {
+            ctx.fillStyle = "black";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // رسم اللاعب (سفينة فضائية بسيطة)
+            ctx.fillStyle = "#0af";
+            ctx.fillRect(player.x, player.y, player.w, player.h);
+
+            // رسم الرصاص (ليزر)
+            ctx.fillStyle = "red";
+            bullets.forEach(b => ctx.fillRect(b.x, b.y, b.w, b.h));
+
+            // رسم الأعداء (صخور فضائية)
+            ctx.fillStyle = "#f0f";
+            enemies.forEach(en => ctx.fillRect(en.x, en.y, en.w, en.h));
+
+            update();
+            requestAnimationFrame(draw);
+        }
+
+        draw();
+    </script>
+</body>
+</html>
