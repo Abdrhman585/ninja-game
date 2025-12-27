@@ -1,139 +1,88 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة ألعاب النينجا</title>
-    <style>
-        :root {
-            --primary: #00d2ff;
-            --secondary: #ff0055;
-            --dark-bg: #050a10;
+import time
+import random
+
+class LifeSim:
+    def __init__(self):
+        self.stats = {
+            "money": 500,
+            "hunger": 0,    # من 0 إلى 100
+            "energy": 100,  # من 0 إلى 100
+            "skills": 0,    # مستوى الخبرة
+            "day": 1
         }
+        self.inventory = []
+        self.job = "عامل بسيط"
+        self.is_running = True
 
-        body {
-            margin: 0;
-            background: var(--dark-bg);
-            color: white;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow-x: hidden;
-        }
+    def display_ui(self):
+        print("\n" + "="*30)
+        print(f" اليوم: {self.stats['day']} | الوظيفة: {self.job}")
+        print(f" المال: {self.stats['money']}$ | الخبرة: {self.stats['skills']}")
+        print(f" الجوع: {self.stats['hunger']}% | الطاقة: {self.stats['energy']}%")
+        print("="*30)
 
-        /* عنوان المنصة */
-        header {
-            text-align: center;
-            padding: 40px 20px;
-            background: linear-gradient(to bottom, #0a1f35, var(--dark-bg));
-        }
+    def work(self):
+        if self.stats['energy'] < 20:
+            print("! أنت متعب جداً للعمل، اذهب للنوم.")
+            return
+        
+        # الراتب يعتمد على مستوى المهارة
+        salary = 50 + (self.stats['skills'] * 10)
+        self.stats['money'] += salary
+        self.stats['energy'] -= 30
+        self.stats['hunger'] += 20
+        self.stats['skills'] += 1
+        print(f" تم العمل بنجاح! حصلت على {salary}$ وزادت خبرتك.")
 
-        h1 {
-            font-size: 2.5rem;
-            text-shadow: 0 0 20px var(--primary);
-            margin: 0;
-        }
+    def store(self):
+        print("\n--- المتجر ---")
+        print("1. وجبة سريعة (20$) - تقلل الجوع 30%")
+        print("2. وجبة صحية (50$) - تقلل الجوع 60% وتزيد الطاقة 10%")
+        print("3. دورة تدريبية (200$) - تزيد الخبرة 5 مستويات")
+        choice = input("ماذا تريد أن تشتري؟ (أو 0 للعودة): ")
+        
+        if choice == "1" and self.stats['money'] >= 20:
+            self.stats['money'] -= 20
+            self.stats['hunger'] = max(0, self.stats['hunger'] - 30)
+            print(" يم! الأكل كان لذيذأ.")
+        elif choice == "3" and self.stats['money'] >= 200:
+            self.stats['money'] -= 200
+            self.stats['skills'] += 5
+            print(" زادت مهاراتك بشكل ملحوظ!")
+        else:
+            print(" فشلت العملية (ربما لا تملك المال الكافي).")
 
-        p { color: #888; margin-top: 10px; }
+    def sleep(self):
+        print(" نائم الآن... Zzz")
+        time.sleep(1)
+        self.stats['energy'] = 100
+        self.stats['hunger'] += 30
+        self.stats['day'] += 1
+        print(" صباح جديد! استعدت طاقتك بالكامل.")
 
-        /* شبكة الألعاب */
-        .games-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 20px;
-            padding: 20px;
-            max-width: 800px;
-            margin: 0 auto;
-        }
+    def check_death(self):
+        if self.stats['hunger'] >= 100:
+            print("\n ماتت شخصيتك بسبب الجوع الشديد. جيم أوفر!")
+            self.is_running = False
 
-        /* تصميم بطاقة اللعبة */
-        .game-card {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 20px;
-            text-align: center;
-            text-decoration: none;
-            color: white;
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-        }
+    def run(self):
+        print("مرحباً بك في محاكي الحياة الواقعية!")
+        while self.is_running:
+            self.display_ui()
+            print("1. الذهاب للعمل")
+            print("2. زيارة المتجر")
+            print("3. النوم (بداية يوم جديد)")
+            print("4. خروج")
+            
+            action = input("ما هي خطتك القادمة؟ ")
+            
+            if action == "1": self.work()
+            elif action == "2": self.store()
+            elif action == "3": self.sleep()
+            elif action == "4": self.is_running = False
+            
+            self.check_death()
 
-        .game-card:active {
-            transform: scale(0.95);
-            background: rgba(0, 210, 255, 0.2);
-            border-color: var(--primary);
-        }
-
-        .icon {
-            font-size: 40px;
-            margin-bottom: 5px;
-        }
-
-        .game-title { font-weight: bold; font-size: 1.1rem; }
-
-        /* قسم الإعلانات */
-        .ad-space {
-            margin: 40px 20px;
-            padding: 20px;
-            border: 2px dashed #333;
-            border-radius: 10px;
-            text-align: center;
-            color: #555;
-        }
-    </style>
-</head>
-<body>
-
-    <header>
-        <h1>نـيـنـجـا جـيـمـز</h1>
-        <p>مرحباً بك في عالم المتعة والإثارة</p>
-    </header>
-
-    <div class="games-grid">
-        <a href="ball-game/index.html" class="game-card">
-            <div class="icon">🎾</div>
-            <div class="game-title">لعبة الكرات</div>
-        </a>
-
-        <a href="space-game/index.html" class="game-card" style="border-bottom: 3px solid var(--secondary);">
-            <div class="icon">🚀</div>
-            <div class="game-title">حرب الفضاء</div>
-        </a>
-
-        <a href="gravity-game/index.html" class="game-card">
-            <div class="icon">⚡</div>
-            <div class="game-title">تحدي الجاذبية</div>
-        </a>
-
-        <div class="game-card" style="opacity: 0.5;">
-            <div class="icon">🔒</div>
-            <div class="game-title">قريباً</div>
-        </div>
-    </div>
-
-    <div class="ad-space">
-        مساحة إعلانية مخصصة (قريباً)
-    </div>
-
-</body>
-</html>
-            <div class="game-card" onclick="location.href='snake-game/index.html'">
-                <div style="font-size: 40px;">🐍</div>
-                <h3>لعبة الدودة</h3>
-                <p>قريباً جداً</p>
-            </div>
-        </div>
-
-        <div class="side-ad">إعلان<br>جانبي</div>
-    </div>
-
-</body>
-</html>
-        });
-
-        draw();
-    </script>
-</body>
-</html>
+# تشغيل اللعبة
+game = LifeSim()
+game.run()
